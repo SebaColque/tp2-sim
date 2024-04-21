@@ -1,9 +1,19 @@
 import { useState } from "react";
 
 function Uniforme() {
-    const [a, setA] = useState('');
-    const [b, setB] = useState('');
+    // ELEGIR LOS A Y B
+    const [a, setA] = useState();
+    const [b, setB] = useState();
 
+    const handleAChange = (event) => {
+      setA(event.target.value);
+    };
+  
+    const handleBChange = (event) => {
+      setB(event.target.value);
+    };
+
+    // GENERAR NUMEROS RANDOM 0-1
     const [sampleSize, setSampleSize] = useState(10);
     const [randomNumbers, setRandomNumbers] = useState([]);
 
@@ -14,18 +24,40 @@ function Uniforme() {
         }
     };
 
-  const generateRandomNumbers = () => {
-    const randomArray = Array.from({ length: sampleSize }, () => parseFloat(Math.random().toFixed(4)));
-    setRandomNumbers(randomArray);
-  };
-  
-    const handleAChange = (event) => {
-      setA(event.target.value);
+    // GENERAR NUM RANDOM Y PASARLOS A UNIFORME
+    const generateRandomNumbers = () => {
+        const randomArray = Array.from({ length: sampleSize }, () => parseFloat(parseInt(a) + Math.random()*(parseInt(b)-parseInt(a))).toFixed(4));
+        setRandomNumbers(randomArray);
     };
-  
-    const handleBChange = (event) => {
-      setB(event.target.value);
-    };
+
+    // PEDIR INTERVALOS
+    const [interval, setInterval] = useState("10");
+
+    const handleIntervalChange = (e) => {
+        const value = e.target.value;
+        setInterval(value);
+      };
+
+    //  CALCULAR DATOS
+    const [dataStats, setDataStats] = useState(null);
+    const calculateStats = () => {
+        const count = randomNumbers.length;
+        const max = Math.max(...randomNumbers);
+        const min = Math.min(...randomNumbers);
+        const range = max - min;
+        const amplitude = range / parseInt(interval);
+    
+        const stats = {
+          count: count,
+          max: max,
+          min: min,
+          range: range,
+          amplitude: amplitude
+        };
+        
+    
+        setDataStats(stats);
+      };
   
     return (
       <div>
@@ -63,14 +95,25 @@ function Uniforme() {
         </label>
         <button onClick={generateRandomNumbers}>Generar Muestra</button>
 
-        {/* <div>
+        <div>
             <h2>Muestra Aleatoria:</h2>
             <ul>
             {randomNumbers.map((number, index) => (
                 <li key={index}>{number}</li>
             ))}
             </ul>
-        </div> */}
+        </div>
+
+
+        <label>
+            Seleccionar intervalos:
+            <select value={interval} onChange={handleIntervalChange}>
+            <option value="10">10</option>
+            <option value="12">12</option>
+            <option value="16">16</option>
+            <option value="23">23</option>
+            </select>
+        </label>
 
       </div>
     );
