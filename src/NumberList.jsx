@@ -10,7 +10,7 @@ const NumberList = ({ randomNumbers }) => {
 
   return (
     <List
-      width={300}
+      width={500}
       height={300}
       rowCount={randomNumbers.length}
       rowHeight={20}

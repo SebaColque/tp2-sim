@@ -1,0 +1,19 @@
+input,
+.selectIntervalos{
+    margin-left: 20px;
+    width: 100px;
+    text-align: center;
+}
+
+button{
+    margin: 30px 0;
+}
+
+.numberList{
+    margin-bottom: 50px;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.resultadosBondad{
+    margin-top: 40px;
+}

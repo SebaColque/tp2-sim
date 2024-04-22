@@ -32,8 +32,6 @@ function App() {
           <option value="exponencial">Exponencial</option>
           <option value="normal">Normal</option>
         </select>
-        {distribucion && <p>Seleccionaste la distribución: {distribucion}</p>}
-
 
         {distribucion === "uniforme" && <Uniforme/>}
       </div>

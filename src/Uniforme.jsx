@@ -3,6 +3,7 @@ import Chart from "chart.js/auto";
 import NumberList from "./NumberList";
 import jStat from "jstat";
 import Tabla from "./Tabla";
+import "./Uniforme.css"
 
 function Uniforme() {
   // ELEGIR LOS A Y B
@@ -86,7 +87,9 @@ function Uniforme() {
   const [intervals, setIntervals] = useState([]);
   const [myChart, setMyChart] = useState();
   const [chiCalculado, setChiCalculado] = useState();
+  const [chiCalculadoMenor, setChiCalculadoMenor] = useState(false)
   const [ksCalcualdo, setKsCalculado] = useState();
+  const [ksCalculadoMenor, setKsCalculadoMenor] = useState(false)
 
   const calculateStats = () => {
     // CALCULAR DATOS
@@ -165,13 +168,14 @@ function Uniforme() {
       { length: intervalArray.length },
       () => randomNumbers.length / intervalArray.length
     );
-    setChiCalculado(
-      calcularChiCuadrado(frecuenciasObservadas, frecuenciasEsperadas)
-    );
-    setKsCalculado(
-        // calcularKS(frecuenciasObservadas, frecuenciasEsperadas)
-        calcularKS(frecuenciasObservadas, frecuenciasEsperadas, randomNumbers.length)
-    )
+
+    const chicalc = calcularChiCuadrado(frecuenciasObservadas, frecuenciasEsperadas)
+    setChiCalculado(chicalc);
+    setChiCalculadoMenor(chicalc < parseFloat(jStat.chisquare.inv(0.95, 9).toFixed(4)))
+
+    const kscacl = calcularKS(frecuenciasObservadas, frecuenciasEsperadas, randomNumbers.length)
+    setKsCalculado(kscacl)
+    setKsCalculadoMenor(kscacl < parseFloat(1.36/Math.sqrt(randomNumbers.length).toFixed(4)))
   };
 
 
@@ -197,7 +201,7 @@ function Uniforme() {
           labels: labels,
           datasets: [
             {
-              label: "# de Números",
+              label: "Frecuencia Observada",
               data: counts,
               backgroundColor: "rgba(54, 162, 235, 0.2)",
               borderColor: "rgba(54, 162, 235, 1)",
@@ -209,6 +213,17 @@ function Uniforme() {
           scales: {
             y: {
               beginAtZero: true,
+              title: {
+                display: true,
+                text: "Frecuencias Observadas"
+              }
+            },
+            x: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "Intervalos"
+              }
             },
           },
         },
@@ -236,11 +251,15 @@ function Uniforme() {
         onChange={handleBChange}
         placeholder="B"
       />
+
+      {/*
       {a && b && (
         <p>
           A ingresado: {a}, B ingresado: {b}
         </p>
       )}
+      */}
+
       <br />
       <label>
         Tamaño de la muestra (hasta 1,000,000):
@@ -250,17 +269,21 @@ function Uniforme() {
           onChange={handleSampleSizeChange}
         />
       </label>
+
+      <br />
       <button onClick={generateRandomNumbers}>Generar Muestra</button>
 
       {numerosGenerados && (
         <>
-        <div>
-          <NumberList randomNumbers={randomNumbers} />
+        <div className="numberList">
+          <NumberList randomNumbers={randomNumbers}/>
         </div>
+
+        <h4>H0: La serie de datos presenta una distribucion uniforme</h4>
   
-        <label>
+        <label className="selectIntervalos">
           Seleccionar intervalos:
-          <select value={interval} onChange={handleIntervalChange}>
+          <select value={interval} onChange={handleIntervalChange} className="selectIntervalos">
             <option value="10">10</option>
             <option value="12">12</option>
             <option value="16">16</option>
@@ -293,15 +316,26 @@ function Uniforme() {
       </div>
 
       {numerosGenerados && dataStats && (
-      <div>
-        Chi calculado: {parseFloat(chiCalculado).toFixed(4)}
-        <br />
-        Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, 9)).toFixed(4)}
-        <br />
-        KS calculado: {parseFloat(ksCalcualdo).toFixed(4)}
-        <br />
-        KS tabulado: {parseFloat(1.36/Math.sqrt(randomNumbers.length)).toFixed(4)}
-      </div>
+        <div className="resultadosBondad">
+          Chi calculado: {parseFloat(chiCalculado).toFixed(4)}
+          {(chiCalculadoMenor)
+            ? "   <   "
+            : "   >   "}
+          Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, 9)).toFixed(4)}    ➙           
+          {(chiCalculadoMenor)
+            ? "   No se rechaza la H0"
+            : "   Se rechaza la H0"}
+          <br />
+          
+          KS calculado: {parseFloat(ksCalcualdo).toFixed(4)}
+          {(ksCalculadoMenor)
+            ? "   <   "
+            : "   >   "}
+          KS tabulado: {parseFloat(1.36/Math.sqrt(randomNumbers.length)).toFixed(4)}    ➙           
+          {(ksCalculadoMenor)
+            ? "   No se rechaza la H0"
+            : "   Se rechaza la H0"}
+        </div>
       )}
     </div>
   );
