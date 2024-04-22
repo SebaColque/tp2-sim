@@ -19,7 +19,7 @@ function Uniforme() {
 
 
   // MANEJAR TAMAÑO DE MUESTRA
-  const [sampleSize, setSampleSize] = useState(10);
+  const [sampleSize, setSampleSize] = useState(30);
 
   const handleSampleSizeChange = (e) => {
     const value = parseInt(e.target.value);
@@ -37,8 +37,11 @@ function Uniforme() {
     const numeroA = parseInt(a);
     const numeroB = parseInt(b);
     for (let i = 0; i < sampleSize; i++) {
+        if(Math.random() == 1){
+            console.log('true')
+        }
       randomArray.push(
-        parseFloat(numeroA + Math.random() * (numeroB - numeroA)).toFixed(4)
+        parseFloat(numeroA + Math.random() * (numeroB - numeroA - 0.0001)).toFixed(4)
       );
     }
     setRandomNumbers(randomArray);
@@ -64,12 +67,26 @@ function Uniforme() {
     return chiCuadrado;
   };
 
+//   FUNCION CALCULAR KS
+  const calcularKS = (observadas, esperadas, cantidadDatos) => {
+    const diferenciasPoPeAc = [];
+    let probObservadaAcumulada = 0;
+    let probEsperadaAcumulada = 0;
+    for (let i = 0; i < observadas.length; i++) {
+        probObservadaAcumulada += observadas[i]/cantidadDatos;
+        probEsperadaAcumulada += esperadas[i]/cantidadDatos;
+        diferenciasPoPeAc.push(Math.abs(probObservadaAcumulada-probEsperadaAcumulada));
+      }
+      return Math.max(...diferenciasPoPeAc);
+  }
+
 
   //  CALCULAR DATOS, INTERVALOS, GRAFICO, CHI
   const [dataStats, setDataStats] = useState(null);
   const [intervals, setIntervals] = useState([]);
   const [myChart, setMyChart] = useState();
   const [chiCalculado, setChiCalculado] = useState();
+  const [ksCalcualdo, setKsCalculado] = useState();
 
   const calculateStats = () => {
     // CALCULAR DATOS
@@ -101,8 +118,8 @@ function Uniforme() {
       const intervalStart = min + i * intervalSize;
       const intervalEnd = intervalStart + intervalSize;
       intervalArray.push({
-        intervalStart: intervalStart.toFixed(4),
-        intervalEnd: intervalEnd.toFixed(4),
+        intervalStart: parseFloat(intervalStart).toFixed(4),
+        intervalEnd: parseFloat(intervalEnd).toFixed(4),
         count: 0,
       });
     }
@@ -129,13 +146,13 @@ function Uniforme() {
     });
 
     //   AGRUPAR INTERVALOS CON Fo < 5
-    for (let i = 0; i < intervalArray.length; i++) {
-      if (intervalArray[i].count < 5 && i !== intervalArray.length - 1) {
-        intervalArray[i].count += intervalArray[i + 1].count;
-        intervalArray.splice(i + 1, 1);
-        i--;
-      }
-    }
+    // for (let i = 0; i < intervalArray.length; i++) {
+    //   if (intervalArray[i].count < 5 && i !== intervalArray.length - 1) {
+    //     intervalArray[i].count += intervalArray[i + 1].count;
+    //     intervalArray.splice(i + 1, 1);
+    //     i--;
+    //   }
+    // }
 
     setIntervals(intervalArray);
     drawChart(intervalArray);
@@ -151,6 +168,10 @@ function Uniforme() {
     setChiCalculado(
       calcularChiCuadrado(frecuenciasObservadas, frecuenciasEsperadas)
     );
+    setKsCalculado(
+        // calcularKS(frecuenciasObservadas, frecuenciasEsperadas)
+        calcularKS(frecuenciasObservadas, frecuenciasEsperadas, randomNumbers.length)
+    )
   };
 
 
@@ -263,7 +284,7 @@ function Uniforme() {
             <p>Rango: {dataStats.range}</p>
             <p>Amplitud: {dataStats.amplitude}</p>
             </div>
-            <Tabla frecuencias={intervals}/>
+            {/* <Tabla frecuencias={intervals}/> */}
         </>
       )}
 
@@ -275,7 +296,11 @@ function Uniforme() {
       <div>
         Chi calculado: {parseFloat(chiCalculado).toFixed(4)}
         <br />
-        Chi tabulado: {jStat.chisquare.inv(0.95, 9)}
+        Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, 9)).toFixed(4)}
+        <br />
+        KS calculado: {parseFloat(ksCalcualdo).toFixed(4)}
+        <br />
+        KS tabulado: {parseFloat(1.36/Math.sqrt(randomNumbers.length)).toFixed(4)}
       </div>
       )}
     </div>
