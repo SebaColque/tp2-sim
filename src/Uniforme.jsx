@@ -54,13 +54,15 @@ function Uniforme() {
     //  CALCULAR DATOS
     const [dataStats, setDataStats] = useState(null);
     const [intervals, setIntervals] = useState([]);
+
+      let myChart;
+
     const calculateStats = () => {
         const count = randomNumbers.length;
-        const max = Math.max(...randomNumbers);
-        const min = Math.min(...randomNumbers);
-        const range = max - min;
+        const max = randomNumbers.reduce((max, current) => Math.max(max, current), -Infinity);
+        const min = randomNumbers.reduce((min, current) => Math.min(min, current), Infinity);        const range = max - min;
         const amplitude = range / parseInt(interval);
-    
+        console.log(1)
         const stats = {
           count: count,
           max: max,
@@ -71,7 +73,7 @@ function Uniforme() {
         
         setDataStats(stats);
         
-
+        console.log(2)
         const intervalSize = amplitude;
         const intervalArray = [];
         for (let i = 0; i < parseInt(interval); i++) {
@@ -83,7 +85,7 @@ function Uniforme() {
             count: 0
         });
         }
-
+        console.log(3)
         randomNumbers.forEach(number => {
             for (let i = 0; i < intervalArray.length; i++) {
                 // console.log(i, intervalArray.length)
@@ -100,19 +102,27 @@ function Uniforme() {
                 }
             }
           });
-
+          console.log(4)
+    
         setIntervals(intervalArray);
+        console.log(5)
+        if(myChart){
+            myChart.destroy()
+        }
         drawChart(intervalArray);
+        console.log(6)
+
         console.log(dataStats)
         console.log(intervalArray)
       };
+
 
       const drawChart = (intervals) => {
         const labels = intervals.map(interval => `[${interval.intervalStart} - ${interval.intervalEnd}]`);
         const counts = intervals.map(interval => interval.count);
     
         const ctx = document.getElementById('myChart');
-        new Chart(ctx, {
+        myChart = new Chart(ctx, {
           type: 'bar',
           data: {
             labels: labels,
@@ -134,26 +144,7 @@ function Uniforme() {
         });
       };
 
-      const [startIndex, setStartIndex] = useState(0);
-        const [visibleNumbers, setVisibleNumbers] = useState([]);
-
-        useEffect(() => {
-            const batchSize = 1000; // Ajusta este valor según tus necesidades
-            const endIndex = startIndex + batchSize;
-            setVisibleNumbers(randomNumbers.slice(startIndex, endIndex));
-        }, [startIndex, randomNumbers]);
-
-        const handleScroll = (event) => {
-            const scrollHeight = event.target.scrollHeight;
-            const scrollTop = event.target.scrollTop;
-            const clientHeight = event.target.clientHeight;
-
-            if (scrollHeight - scrollTop === clientHeight) {
-            setStartIndex((prevIndex) => prevIndex + 1000);
-            }
-        };
       
-  
     return (
       <div>
         <h2>Uniforme</h2>
@@ -190,14 +181,6 @@ function Uniforme() {
         </label>
         <button onClick={generateRandomNumbers}>Generar Muestra</button>
 
-        {/* <div>
-            <h2>Muestra Aleatoria:</h2>
-            <ul>
-            {randomNumbers.map((number, index) => (
-                <li key={index}>{number}</li>
-            ))}
-            </ul>
-        </div> */}
         <div>
             <NumberList randomNumbers={randomNumbers}/>
         </div>
