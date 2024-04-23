@@ -11,6 +11,7 @@ import fixReactVirtualized from 'esbuild-plugin-react-virtualized'
 
 export default defineConfig({
   plugins: [react()],
+  base: 'https://sebacolque.github.io/tp2-sim',
   optimizeDeps: {
     esbuildOptions: {
       plugins: [fixReactVirtualized],

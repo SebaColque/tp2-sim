@@ -1,4 +1,4 @@
-import React from 'react';
+/* eslint-disable react/prop-types */
 import { List } from 'react-virtualized';
 
 const NumberList = ({ randomNumbers }) => {

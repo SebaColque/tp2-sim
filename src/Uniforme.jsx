@@ -1,8 +1,7 @@
 import { useState } from "react";
 import Chart from "chart.js/auto";
-import NumberList from "./NumberList";
+import NumberList from "./components/NumberList";
 import jStat from "jstat";
-import Tabla from "./Tabla";
 import "./Uniforme.css"
 
 function Uniforme() {
@@ -38,9 +37,6 @@ function Uniforme() {
     const numeroA = parseInt(a);
     const numeroB = parseInt(b);
     for (let i = 0; i < sampleSize; i++) {
-        if(Math.random() == 1){
-            console.log('true')
-        }
       randomArray.push(
         parseFloat(numeroA + Math.random() * (numeroB - numeroA - 0.0001)).toFixed(4)
       );
@@ -84,7 +80,6 @@ function Uniforme() {
 
   //  CALCULAR DATOS, INTERVALOS, GRAFICO, CHI
   const [dataStats, setDataStats] = useState(null);
-  const [intervals, setIntervals] = useState([]);
   const [myChart, setMyChart] = useState();
   const [chiCalculado, setChiCalculado] = useState();
   const [chiCalculadoMenor, setChiCalculadoMenor] = useState(false)
@@ -157,7 +152,6 @@ function Uniforme() {
     //   }
     // }
 
-    setIntervals(intervalArray);
     drawChart(intervalArray);
 
     // CALCULAR Fo, Fe y Chi

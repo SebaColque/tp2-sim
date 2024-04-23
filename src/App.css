@@ -16,9 +16,7 @@
   align-items: center;
   gap: 2rem;
 }
-.exponencial input{
-  padding: .5rem;
-}
+
 
 .tablas{
   display: flex;
