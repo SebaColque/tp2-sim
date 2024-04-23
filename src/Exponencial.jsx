@@ -1,7 +1,5 @@
 import  { useEffect, useState } from 'react';
 import FrequencyChart from './components/FrecuencyChart'
-import TablaFrecuencias from './components/TablaFrecuencias'
-import TablaFrecuenciasChiCuadrado from './components/TablaFrecuenciasChiCuadrado'
 import jStat from 'jstat';
 import NumberList from './components/NumberList';
 

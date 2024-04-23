@@ -70,7 +70,7 @@ function TablaKS({cantidadDatos, intervalArray, fe, }) {
               <td>{parseFloat(diferenciaPoPe[index]).toFixed(4)}</td>
               {index === intervalArray.length -1
               ?
-              <td style={{backgroundColor: "red"}}>{maximoPrimeraLista.toFixed(4)}</td>
+              <td style={{backgroundColor: "blue"}}>{maximoPrimeraLista.toFixed(4)}</td>
               :
               <td>{maximoPrimeraLista.toFixed(4)}</td>
               }

@@ -41,7 +41,7 @@ function Tabla({intervalArray, fe, c}) {
               <td>{parseFloat(c[index]).toFixed(4)}</td>
               {index === intervalArray.length -1
               ?
-              <td style={{backgroundColor: "red"}}>{parseFloat(acumulado[index]).toFixed(4)}</td>
+              <td style={{backgroundColor: "blue"}}>{parseFloat(acumulado[index]).toFixed(4)}</td>
               :
               <td>{parseFloat(acumulado[index]).toFixed(4)}</td>
               }
