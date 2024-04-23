@@ -1,6 +1,23 @@
-function Tabla({frecuencias, fe}) {
-    return ( 
+import { useEffect, useState } from "react";
+import './Table.css'
 
+function Tabla({intervalArray, fe, c}) {
+
+
+  const [acumulado, setAcumulado] = useState([]);
+  useEffect(() => {
+    if (c) {
+      const cAc = [];
+      let acumulado = 0;
+      for (let i = 0; i < c.length; i++) {
+        acumulado += c[i];
+        cAc.push(acumulado.toFixed(4));
+      }
+      setAcumulado(cAc);
+    }
+  }, [c])
+
+    return ( 
         <table>
         <thead>
           <tr>
@@ -14,12 +31,20 @@ function Tabla({frecuencias, fe}) {
           </tr>
         </thead>
         <tbody>
-          {frecuencias.map((frecuencia, index) => (
+          {acumulado && intervalArray.map((interavl, index) => (
             <tr key={index}>
-                <td>{index}</td>
-              <td>{frecuencia.intervalStart}</td>
-              <td>{frecuencia.intervalEnd}</td>
-              <td>{frecuencia.count}</td>
+              <td>{index+1}</td>
+              <td>{interavl.intervalStart}</td>
+              <td>{interavl.intervalEnd}</td>
+              <td>{interavl.count}</td>
+              <td>{parseFloat(fe[index]).toFixed(4)}</td>
+              <td>{parseFloat(c[index]).toFixed(4)}</td>
+              {index === intervalArray.length -1
+              ?
+              <td style={{backgroundColor: "red"}}>{parseFloat(acumulado[index]).toFixed(4)}</td>
+              :
+              <td>{parseFloat(acumulado[index]).toFixed(4)}</td>
+              }
             </tr>
           ))}
         </tbody>

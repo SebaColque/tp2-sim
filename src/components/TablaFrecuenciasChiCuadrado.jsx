@@ -1,5 +1,5 @@
 function TablaFrecuenciasChiCuadrado({ frecuenciasObservadas, frecuenciasEsperadas }) {
-    return (
+  return (
       <table>
         <thead>
           <tr>
