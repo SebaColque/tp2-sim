@@ -194,7 +194,7 @@ function Uniforme() {
 
     const chicalc = calcularChiCuadrado(frecuenciasObservadas, frecuenciasEsperadas)
     setChiCalculado(chicalc);
-    setChiCalculadoMenor(chicalc < parseFloat(jStat.chisquare.inv(0.95, interval).toFixed(4)))
+    setChiCalculadoMenor(chicalc < parseFloat(jStat.chisquare.inv(0.95, interval-1).toFixed(4)))
 
     const kscacl = calcularKS(frecuenciasObservadas, frecuenciasEsperadas, randomNumbers.length)
     setKsCalculado(kscacl)
@@ -354,7 +354,7 @@ function Uniforme() {
             {(chiCalculadoMenor)
               ? "   <   "
               : "   >   "}
-            Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, interval)).toFixed(4)}    ➙           
+            Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, interval-1)).toFixed(4)}    ➙           
             {(chiCalculadoMenor)
               ? "   No se rechaza la H0"
               : "   Se rechaza la H0"}
