@@ -354,7 +354,7 @@ function Uniforme() {
             {(chiCalculadoMenor)
               ? "   <   "
               : "   >   "}
-            Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, 9)).toFixed(4)}    ➙           
+            Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, interval)).toFixed(4)}    ➙           
             {(chiCalculadoMenor)
               ? "   No se rechaza la H0"
               : "   Se rechaza la H0"}
