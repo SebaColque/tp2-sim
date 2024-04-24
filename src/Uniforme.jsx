@@ -194,7 +194,7 @@ function Uniforme() {
 
     const chicalc = calcularChiCuadrado(frecuenciasObservadas, frecuenciasEsperadas)
     setChiCalculado(chicalc);
-    setChiCalculadoMenor(chicalc < parseFloat(jStat.chisquare.inv(0.95, 9).toFixed(4)))
+    setChiCalculadoMenor(chicalc < parseFloat(jStat.chisquare.inv(0.95, interval).toFixed(4)))
 
     const kscacl = calcularKS(frecuenciasObservadas, frecuenciasEsperadas, randomNumbers.length)
     setKsCalculado(kscacl)
