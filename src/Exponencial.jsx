@@ -2,6 +2,8 @@ import  { useEffect, useState } from 'react';
 import FrequencyChart from './components/FrecuencyChart'
 import jStat from 'jstat';
 import NumberList from './components/NumberList';
+import TablaChi from './components/Tabla';
+import TablaKS from './components/TablaKS';
 
 function Exponencial() {
   const [media, setMedia] = useState('');
@@ -9,13 +11,16 @@ function Exponencial() {
   const [numerosAleatorios, setNumerosAleatorios] = useState([]);
   const [cantIntervalos, setCantIntervalos] = useState(5);
   const [dataSet, setDataSet] = useState(false);
+  const [dataStats, setDataStats] = useState(false);
   const [frecuencias, setFrecuencias] = useState([]);
   const [cantMuestra, setCantMuestra] = useState(10000);
   const [resultadoPrueba, setResultadoPrueba] = useState(null); // Aceptar o rechazar la hipótesis
   const [chiCuadrado, setChiCuadrado] = useState(null);
   const [chiTabulado, setChiTabulado] = useState(null);
   const [ksCalcualdo, setKsCalculado] = useState();
-  const [ksCalculadoMenor, setKsCalculadoMenor] = useState(false)
+  const [ksCalculadoMenor, setKsCalculadoMenor] = useState(false);
+  const [c, setC] = useState();
+
   const [frecChi, setFrecChi] = useState(
     {
       fo: [],
@@ -111,6 +116,7 @@ function Exponencial() {
       });
     }
 
+
     const frecuenciasEsperadas = calcularFrecuenciasEsperadas(k, min, max, numeros, lambda);
 
     for (let i = frecuencias.length - 1; i > 0; i--) {
@@ -125,9 +131,15 @@ function Exponencial() {
     }
     
     const frecuenciasObservadas = frecuencias.map((frecuencia) => frecuencia.frecuencia);
-    
 
-    
+    const stats = {
+      count: frecuencias.frecuencia,
+      max: max,
+      min: min,
+      range: rango,
+      amplitude: amplitud,
+    };
+    setDataStats(stats);
     
 
     setFrecChi({
@@ -146,7 +158,6 @@ function Exponencial() {
     setChiTabulado(valorCritico);
     const resultado = chiCuadrado <= valorCritico ? 'No se rechaza H0' : 'Se rechaza H0';
     setResultadoPrueba(resultado);
-    console.log('res', resultado);
 
     setFrecuencias(frecuencias);
     setChiCuadrado(chiCuadrado);
@@ -154,17 +165,22 @@ function Exponencial() {
 
   const calcularChiCuadrado = (observadas, esperadas) => {
     let chiCuadrado = 0;
+    let estadistico = [];
     for (let i = 0; i < observadas.length; i++) {
       if (isFinite(esperadas[i])) { // Verificar si es un número válido
-        chiCuadrado += Math.pow(observadas[i] - esperadas[i], 2) / esperadas[i];
+        estadistico.push(Math.pow(observadas[i] - esperadas[i], 2) / esperadas[i]);
+        chiCuadrado += estadistico[i];
       }
     }
+    setC(estadistico);
     return chiCuadrado;
   };
   
   const calculateStats = () => {
     setDataSet(true);
   }
+
+
 
   const calcularKS = (observadas, esperadas, cantidadDatos) => {
     const diferenciasPoPeAc = [];
@@ -216,7 +232,7 @@ function Exponencial() {
        
       <button onClick={() => generarNumerosAleatorios(cantMuestra)}>Generar números aleatorios</button>
         
-      {media && <p>Media ingresada: {media}</p>}
+      {/* {media && <p>Media ingresada: {media}</p>} */}
       {numerosAleatorios.length > 0 && (
         <div>
           <h3>Números aleatorios generados:</h3>
@@ -225,12 +241,40 @@ function Exponencial() {
           <button onClick={calculateStats}>Crear histograma</button>
           {dataSet && (
             <div>
+                  {dataSet && dataStats && (
+        <>
+            <div>
+            <h2>Estadísticas:</h2>
+            <p>Cantidad de datos: {dataStats.count}</p>
+            <p>Máximo: {parseFloat(dataStats.max).toFixed(4)}</p>
+            <p>Mínimo: {parseFloat(dataStats.min).toFixed(4)}</p>
+            <p>Rango: {parseFloat(dataStats.range).toFixed(4)}</p>
+            <p>Amplitud: {parseFloat(dataStats.amplitude).toFixed(4)}</p>
+            </div>
+            {/* <Tabla frecuencias={intervals}/> */}
+        </>
+      )}
+      
               <h3>Gráfico de Frecuencias:</h3>
               <FrequencyChart numbers={numerosAleatorios} intervals={cantIntervalos} />
               <div>
                   <p>H0: La serie de datos presenta una distribución exponencial</p>
                 </div>
-              <div className='chi'>
+
+                <br />
+              <br />
+              <h3>Tabla ChiCuadrado</h3>
+                  <TablaChi
+                  intervalArray={frecuencias.map(({ intervaloInferior, intervaloSuperior, frecuencia }) => ({
+                    intervalStart: parseFloat(intervaloInferior.toFixed(4)),
+                    intervalEnd: parseFloat(intervaloSuperior.toFixed(4)), 
+                    count: parseFloat(frecuencia)
+                  }))}
+                  fe={frecChi.fe}
+                  c={c}
+              />
+
+            <div className='chi'>
                 <div>
                   <h3>Chi Cuadrado:</h3>
                   <p>{chiCuadrado !== null ? chiCuadrado.toFixed(4) : 'Calculando...'}</p>
@@ -243,6 +287,20 @@ function Exponencial() {
                 <h3>Resultado de la prueba:</h3>
                 <p>{resultadoPrueba !== null ? resultadoPrueba : 'Calculando...'}</p>
               </div>
+
+          <br />
+          <br />
+          <h3>Tabla KS</h3>
+          <TablaKS
+            cantidadDatos={numerosAleatorios.length}
+            intervalArray={frecuencias.map(({ intervaloInferior, intervaloSuperior, frecuencia }) => ({
+              intervalStart: parseFloat(intervaloInferior.toFixed(4)),
+              intervalEnd: parseFloat(intervaloSuperior.toFixed(4)), 
+              count: parseFloat(frecuencia)
+            }))}
+            fe={frecChi.fe}
+            c={c}
+          />
               <div className='chi'>
                 <div>
                   <h3>KS calculado:</h3>
@@ -258,16 +316,6 @@ function Exponencial() {
                       ? "   No se rechaza la H0"
                       : "   Se rechaza la H0"}</p>
               </div>
-              {/* <div className='tablas'>
-                <div>
-                  <h3>Frecuencias:</h3>
-                  <TablaFrecuencias frecuencias={frecuencias}/>
-                </div>
-                <div>
-                  <h3>Frecuencias Chi Cuadrado:</h3>
-                  <TablaFrecuenciasChiCuadrado  frecuenciasObservadas={frecChi.fo} frecuenciasEsperadas={frecChi.fe} />
-                </div>
-              </div> */}
             </div>
           )}
         </div>

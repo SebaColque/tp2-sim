@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import './Table.css'
 
-function Tabla({intervalArray, fe, c}) {
+function Tabla({intervalArray, fe, c, setChiCalculado}) {
 
 
   const [acumulado, setAcumulado] = useState([]);
@@ -31,7 +31,11 @@ function Tabla({intervalArray, fe, c}) {
           </tr>
         </thead>
         <tbody>
-          {acumulado && intervalArray.map((interavl, index) => (
+          {acumulado && intervalArray.map((interavl, index) => {
+            if(index === intervalArray.length -1){
+              setChiCalculado(parseFloat(acumulado[index]).toFixed(4))
+            }
+            return (
             <tr key={index}>
               <td>{index+1}</td>
               <td>{interavl.intervalStart}</td>
@@ -46,7 +50,8 @@ function Tabla({intervalArray, fe, c}) {
               <td>{parseFloat(acumulado[index]).toFixed(4)}</td>
               }
             </tr>
-          ))}
+            )
+          })}
         </tbody>
       </table>
 

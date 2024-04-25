@@ -59,6 +59,7 @@ function Uniforme() {
 
   // FUNCION CALCULAR CHI CUADRADO
   const calcularChiCuadrado = (observadas, esperadas) => {
+    console.log(observadas, esperadas)
     let chiCuadrado = 0;
     for (let i = 0; i < observadas.length; i++) {
       chiCuadrado += Math.pow(observadas[i] - esperadas[i], 2) / esperadas[i];
@@ -83,12 +84,14 @@ function Uniforme() {
   //  CALCULAR DATOS, INTERVALOS, GRAFICO, CHI
   const [dataStats, setDataStats] = useState(null);
 
-  const [intervalArray, setIntervalArray] = useState();
+  const [intervalArrayChi, setIntervalArrayChi] = useState();
+  const [intervalArrayKS, setIntervalArrayKS] = useState();
 
   const [myChart, setMyChart] = useState();
 
   const [frecuenciaObservada, setFrecuenciaObservada] = useState();
   const [frecuenciaEsperada, setFrecuenciaEsperada] = useState();
+  const [frecuenciaEsperadaKS, setFrecuenciaEsperadaKS] = useState();
   const [c, setC] = useState();
   const [cAc, setCAc] = useState();
 
@@ -123,10 +126,16 @@ function Uniforme() {
     // CALCULAR INTERVALOS Y FRECUENCIAS OBSERVADAS
     const intervalSize = amplitude;
     const intervalsArray = [];
+    const intervalsArrayKS = [];
     for (let i = 0; i < parseInt(interval); i++) {
       const intervalStart = min + i * intervalSize;
       const intervalEnd = intervalStart + intervalSize;
       intervalsArray.push({
+        intervalStart: parseFloat(intervalStart).toFixed(4),
+        intervalEnd: parseFloat(intervalEnd).toFixed(4),
+        count: 0,
+      });
+      intervalsArrayKS.push({
         intervalStart: parseFloat(intervalStart).toFixed(4),
         intervalEnd: parseFloat(intervalEnd).toFixed(4),
         count: 0,
@@ -140,6 +149,7 @@ function Uniforme() {
             number < parseFloat(intervalsArray[i].intervalEnd)
           ) {
             intervalsArray[i].count++;
+            intervalsArrayKS[i].count++;
             break;
           }
         } else {
@@ -148,25 +158,15 @@ function Uniforme() {
             number <= parseFloat(intervalsArray[i].intervalEnd)
           ) {
             intervalsArray[i].count++;
+            intervalsArrayKS[i].count++;
             break;
           }
         }
       }
     });
+    // console.log(intervalsArray)
+    setIntervalArrayKS(intervalsArrayKS);
 
-    //   AGRUPAR INTERVALOS CON Fo < 5
-    // for (let i = 0; i < intervalArray.length; i++) {
-    //   if (intervalArray[i].count < 5 && i !== intervalArray.length - 1) {
-    //     intervalArray[i].count += intervalArray[i + 1].count;
-    //     intervalArray.splice(i + 1, 1);
-    //     i--;
-    //   }
-    // }
-
-    drawChart(intervalsArray);
-    setIntervalArray(intervalsArray);
-
-    // CALCULAR Fo, Fe y Chi
     const frecuenciasObservadas = intervalsArray.map(
       (interval) => interval.count
     );
@@ -174,6 +174,35 @@ function Uniforme() {
       { length: intervalsArray.length },
       () => randomNumbers.length / intervalsArray.length
     );
+    const frecuenciasEsperadasKS = Array.from(
+      { length: intervalsArrayKS.length },
+      () => randomNumbers.length / intervalsArrayKS.length
+    );
+    setFrecuenciaEsperadaKS(frecuenciasEsperadasKS)
+    //   AGRUPAR INTERVALOS CON Fo < 5
+    // for (let i = 0; i < intervalsArray.length; i++) {
+    //   if (intervalsArray[i].count < 5 && i !== intervalsArray.length - 1) {
+    //     intervalsArray[i].count += intervalsArray[i + 1].count;
+    //     intervalsArray.splice(i + 1, 1);
+    //     i--;
+    //   }
+    // }
+    for (let i = intervalsArray.length - 1; i > 0; i--) {
+      while (isNaN(frecuenciasEsperadas[i]) || frecuenciasEsperadas[i] < 5) {
+        intervalsArray[i - 1].count += parseFloat(intervalsArray[i].count);
+        const nuevaFrecuenciaEsperada = parseFloat((frecuenciasEsperadas[i - 1] + frecuenciasEsperadas[i]).toFixed(2));
+        frecuenciasEsperadas[i - 1] = isNaN(nuevaFrecuenciaEsperada) ? 0 : nuevaFrecuenciaEsperada;
+        intervalsArray.splice(i, 1);
+        frecuenciasEsperadas.splice(i, 1);
+        i = intervalsArray.length - 1;
+      }
+    }
+
+    drawChart(intervalsArray);
+    setIntervalArrayChi(intervalsArray);
+
+    // CALCULAR Fo, Fe y Chi
+    
 
     const estadistico = intervalsArray.map((interval, index) => {
       return Math.pow(interval.count - frecuenciasEsperadas[0], 2) / frecuenciasEsperadas[0];
@@ -192,13 +221,16 @@ function Uniforme() {
     setC(estadistico);
     // setCAc(cAc)
 
-    const chicalc = calcularChiCuadrado(frecuenciasObservadas, frecuenciasEsperadas)
-    setChiCalculado(chicalc);
-    setChiCalculadoMenor(chicalc < parseFloat(jStat.chisquare.inv(0.95, interval-1).toFixed(4)))
+    // const chicalc = calcularChiCuadrado(intervalsArray.count, frecuenciasEsperadas)
+    // const chicalc = 0
+    // console.log(chicalc)
+    // setChiCalculado(chicalc);
+    // setChiCalculadoMenor(chicalc < parseFloat(jStat.chisquare.inv(0.95, intervalsArray.length-1).toFixed(4)))
 
-    const kscacl = calcularKS(frecuenciasObservadas, frecuenciasEsperadas, randomNumbers.length)
-    setKsCalculado(kscacl)
-    setKsCalculadoMenor(kscacl < parseFloat(1.36/Math.sqrt(randomNumbers.length).toFixed(4)))
+    // const kscacl = calcularKS(frecuenciasObservadas, frecuenciasEsperadasKS, randomNumbers.length)
+    // console.log(kscacl)
+    // setKsCalculado(kscacl)
+    // setKsCalculadoMenor(kscacl < parseFloat(1.36/Math.sqrt(randomNumbers.length).toFixed(4)))
   };
 
 
@@ -323,10 +355,10 @@ function Uniforme() {
             <div>
             <h2>Estadísticas:</h2>
             <p>Cantidad de datos: {dataStats.count}</p>
-            <p>Máximo: {dataStats.max}</p>
-            <p>Mínimo: {dataStats.min}</p>
-            <p>Rango: {dataStats.range}</p>
-            <p>Amplitud: {dataStats.amplitude}</p>
+            <p>Máximo: {parseFloat(dataStats.max).toFixed(4)}</p>
+            <p>Mínimo: {parseFloat(dataStats.min).toFixed(4)}</p>
+            <p>Rango: {parseFloat(dataStats.range).toFixed(4)}</p>
+            <p>Amplitud: {parseFloat(dataStats.amplitude).toFixed(4)}</p>
             </div>
             {/* <Tabla frecuencias={intervals}/> */}
         </>
@@ -339,33 +371,43 @@ function Uniforme() {
 
       {numerosGenerados && dataStats && frecuenciaEsperada && (
         <>
-          <h3>Tabla ChiCuadrado</h3>
-          <Tabla intervalArray={intervalArray} fe={frecuenciaEsperada}
-                  c={c}/>
-
-          <h3>Tabla KS</h3>
-          <TablaKS cantidadDatos={randomNumbers.length} intervalArray={intervalArray} fe={frecuenciaEsperada}
-                  c={c}/>
-
           <h4>H0: La serie de datos presenta una distribucion uniforme</h4>
 
+          <br />
+          <br />
+          <h3>Tabla ChiCuadrado</h3>
+          <Tabla intervalArray={intervalArrayChi} fe={frecuenciaEsperada}
+                  c={c} setChiCalculado={setChiCalculado}/>
+            
+            
+            <div>
+
+      
+              Chi calculado: {parseFloat(chiCalculado).toFixed(4)}
+              {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1).toFixed(4)))
+                ? "   <   "
+                : "   >   "}
+              Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1)).toFixed(4)}    ➙           
+              {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1).toFixed(4)))
+                ? "   No se rechaza la H0"
+                : "   Se rechaza la H0"}
+            </div>
+          
+
+          <br />
+          <br />
+          <h3>Tabla KS</h3>
+          <TablaKS cantidadDatos={randomNumbers.length} intervalArray={intervalArrayKS} fe={frecuenciaEsperadaKS}
+                  c={c} setKsCalculado={setKsCalculado}/>
+
           <div className="resultadosBondad">
-            Chi calculado: {parseFloat(chiCalculado).toFixed(4)}
-            {(chiCalculadoMenor)
-              ? "   <   "
-              : "   >   "}
-            Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, interval-1)).toFixed(4)}    ➙           
-            {(chiCalculadoMenor)
-              ? "   No se rechaza la H0"
-              : "   Se rechaza la H0"}
-            <br />
             
             KS calculado: {parseFloat(ksCalcualdo).toFixed(4)}
-            {(ksCalculadoMenor)
+            {(ksCalcualdo < parseFloat(1.36/Math.sqrt(randomNumbers.length).toFixed(4)))
               ? "   <   "
               : "   >   "}
             KS tabulado: {parseFloat(1.36/Math.sqrt(randomNumbers.length)).toFixed(4)}    ➙           
-            {(ksCalculadoMenor)
+            {(ksCalcualdo < parseFloat(1.36/Math.sqrt(randomNumbers.length).toFixed(4)))
               ? "   No se rechaza la H0"
               : "   Se rechaza la H0"}
           </div>

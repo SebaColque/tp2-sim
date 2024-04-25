@@ -1,7 +1,7 @@
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 100px;
+    margin-bottom: 20px;
   }
 
   thead th {
@@ -13,7 +13,6 @@ table {
   }
 
   tbody td {
-    /* border: 1px solid #dddddd; */
     padding: 8px;
   }
 

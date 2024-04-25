@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 
-function TablaKS({cantidadDatos, intervalArray, fe, }) {
+function TablaKS({cantidadDatos, intervalArray, fe, setKsCalculado}) {
 
     let maximoPrimeraLista = 0;
 
     const [observadoAcumulado, setObservadoAcumulado] = useState([]);
     const [esperadoAcumulado, setEsperadoAcumulado] = useState([]);
     const [diferenciaPoPe, setDiferenciaPoPe] = useState([]);
+    // console.log(intervalArray, fe)
     useEffect(() => {
       if (intervalArray) {
         const poacumulada = [];
@@ -56,6 +57,9 @@ function TablaKS({cantidadDatos, intervalArray, fe, }) {
         <tbody>
           {observadoAcumulado && intervalArray.map((interval, index) => {
             maximoPrimeraLista = Math.max(maximoPrimeraLista, parseFloat(diferenciaPoPe[index]).toFixed(4));
+            if(index === intervalArray.length -1){
+              setKsCalculado(maximoPrimeraLista.toFixed(4))
+            }
             return (
             <tr key={index}>
               <td>{index+1}</td>
