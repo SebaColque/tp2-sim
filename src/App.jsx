@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import './App.css'
 import Uniforme from './Uniforme';
 import Exponencial from './Exponencial';
+import Normal from './Normal';
 
 
 
@@ -34,6 +35,7 @@ function App() {
 
         {distribucion === "uniforme" && <Uniforme/>}
         {distribucion === "exponencial" && <Exponencial/>}
+        {distribucion === "normal" && <Normal/>}
       </div>
 
       {/* {distribucion == "exponencial" && Uniforme}

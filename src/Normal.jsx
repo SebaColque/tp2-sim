@@ -6,18 +6,18 @@ import "./Uniforme.css"
 import Tabla from "./components/Tabla";
 import TablaKS from "./components/TablaKS";
 
-function Uniforme() {
-  // ELEGIR LOS A Y B
-  const [a, setA] = useState();
-  const [b, setB] = useState();
-
-  const handleAChange = (event) => {
-    setA(event.target.value);
-  };
-
-  const handleBChange = (event) => {
-    setB(event.target.value);
-  };
+function Normal() {
+    // ELEGIR MEDIA Y DESVIACIÓN
+    const [media, setMedia] = useState();
+    const [desviacion, setDesviacion] = useState();
+  
+    const handleAChange = (event) => {
+      setMedia(event.target.value);
+    };
+  
+    const handleBChange = (event) => {
+      setDesviacion(event.target.value);
+    };
 
 
   // MANEJAR TAMAÑO DE MUESTRA
@@ -31,21 +31,24 @@ function Uniforme() {
   };
 
 
-  // GENERAR NUM RANDOM 0-1 Y PASARLOS A UNIFORME
-  const [randomNumbers, setRandomNumbers] = useState([]);
-  const [numerosGenerados, setNumerosGenerados] = useState(false)
-  const generateRandomNumbers = () => {
+   // GENERAR NUM RANDOM 0-1 Y PASARLOS A NORMAL
+   const [randomNumbers, setRandomNumbers] = useState([]);
+   const [numerosGenerados, setNumerosGenerados] = useState(false)
+   const generateRandomNumbers = () => {
     const randomArray = [];
-    const numeroA = parseInt(a);
-    const numeroB = parseInt(b);
-    for (let i = 0; i < sampleSize; i++) {
-      randomArray.push(
-        parseFloat(numeroA + Math.random() * (numeroB - numeroA - 0.0001)).toFixed(4)
-      );
+    const m = parseInt(media);
+    const d = parseInt(desviacion);
+    for (let i = 0; i < sampleSize; i += 2) {
+        const u1 = Math.random();
+        const u2 = Math.random();
+        const z1 = ((Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)) * d) + m;
+        const z2 = ((Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2)) * d) + m;
+        randomArray.push(parseFloat(z1).toFixed(4));
+        randomArray.push(parseFloat(z2).toFixed(4));
     }
     setRandomNumbers(randomArray);
     setNumerosGenerados(true);
-  };
+    };
 
 
   // PEDIR INTERVALOS
@@ -59,7 +62,6 @@ function Uniforme() {
 
   // FUNCION CALCULAR CHI CUADRADO
   const calcularChiCuadrado = (observadas, esperadas) => {
-    console.log(observadas, esperadas)
     let chiCuadrado = 0;
     for (let i = 0; i < observadas.length; i++) {
       chiCuadrado += Math.pow(observadas[i] - esperadas[i], 2) / esperadas[i];
@@ -164,112 +166,70 @@ function Uniforme() {
         }
       }
     });
-    // console.log(intervalsArray)
+
     setIntervalArrayKS(intervalsArrayKS);
+
+     // CALCULAR Fo, Fe y Chi
+     function calcularFrecuenciaEsperada () {
+      const frecuenciasEsperadas = [];
+      for (let i = 0; i < intervalsArray.length; i++) {
+        const lowerBound = parseFloat(intervalsArray[i].intervalStart);
+        const upperBound = parseFloat(intervalsArray[i].intervalEnd);
+        const marcaClase = (lowerBound + upperBound) / 2;
+        const exponente = -0.5 * Math.pow((marcaClase - media) / desviacion, 2);
+        const coeficiente = Math.exp(exponente) / (desviacion * Math.sqrt(2 * Math.PI));
+        const intervaloSize = upperBound - lowerBound;
+        const probabilidad = coeficiente * intervaloSize;
+        const expectedFrequency = probabilidad * randomNumbers.length
+        frecuenciasEsperadas.push(expectedFrequency);
+      }
+      return frecuenciasEsperadas;
+    };
 
     const frecuenciasObservadas = intervalsArray.map(
       (interval) => interval.count
     );
-    const frecuenciasEsperadas = Array.from(
-      { length: intervalsArray.length },
-      () => randomNumbers.length / intervalsArray.length
-    );
-    const frecuenciasEsperadasKS = Array.from(
-      { length: intervalsArrayKS.length },
-      () => randomNumbers.length / intervalsArrayKS.length
-    );
+    const frecuenciasEsperadas = calcularFrecuenciaEsperada();
+    const frecuenciasEsperadasKS = calcularFrecuenciaEsperada();
     setFrecuenciaEsperadaKS(frecuenciasEsperadasKS)
-    //   AGRUPAR INTERVALOS CON Fo < 5
-    // for (let i = 0; i < intervalsArray.length; i++) {
-    //   if (intervalsArray[i].count < 5 && i !== intervalsArray.length - 1) {
-    //     intervalsArray[i].count += intervalsArray[i + 1].count;
-    //     intervalsArray.splice(i + 1, 1);
-    //     i--;
-    //   }
-    // }
-    // for (let i = intervalsArray.length - 1; i > 0; i--) {
-    //   while (isNaN(frecuenciasEsperadas[i]) || frecuenciasEsperadas[i] < 5) {
-    //     intervalsArray[i - 1].count += parseFloat(intervalsArray[i].count);
-    //     intervalsArray[i - 1].intervalEnd = intervalsArray[i].intervalEnd;
-    //     const nuevaFrecuenciaEsperada = parseFloat((frecuenciasEsperadas[i - 1] + frecuenciasEsperadas[i]).toFixed(2));
-    //     frecuenciasEsperadas[i - 1] = isNaN(nuevaFrecuenciaEsperada) ? 0 : nuevaFrecuenciaEsperada;
-    //     intervalsArray.splice(i, 1);
-    //     frecuenciasEsperadas.splice(i, 1);
-    //     i = intervalsArray.length - 1;
-    //   }
-    //   if(i==1){
-    //     if(isNaN(frecuenciasEsperadas[0]) || frecuenciasEsperadas[0] < 5) {
-    //       intervalsArray[i - 1].count += parseFloat(intervalsArray[i].count);
-    //       intervalsArray[i - 1].intervalEnd = intervalsArray[i].intervalEnd;
-    //       const nuevaFrecuenciaEsperada = parseFloat((frecuenciasEsperadas[i - 1] + frecuenciasEsperadas[i]).toFixed(2));
-    //       frecuenciasEsperadas[i - 1] = isNaN(nuevaFrecuenciaEsperada) ? 0 : nuevaFrecuenciaEsperada;
-    //       intervalsArray.splice(i, 1);
-    //       frecuenciasEsperadas.splice(i, 1);
-    //       i = intervalsArray.length - 1;
-    //     }
-    //   }
 
-  for (let i = 0; i < intervalsArray.length - 1; i++) { 
-    while (isNaN(frecuenciasEsperadas[i]) || frecuenciasEsperadas[i] < 5) { 
-        intervalsArray[i + 1].count += parseFloat(intervalsArray[i].count); 
-        intervalsArray[i + 1].intervalStart = intervalsArray[i].intervalStart; 
-        const nuevaFrecuenciaEsperada = parseFloat((frecuenciasEsperadas[i + 1] + frecuenciasEsperadas[i]).toFixed(2)); 
-        frecuenciasEsperadas[i + 1] = isNaN(nuevaFrecuenciaEsperada) ? 0 : nuevaFrecuenciaEsperada; 
-        intervalsArray.splice(i, 1); 
-        frecuenciasEsperadas.splice(i, 1); 
-        i = 0; 
-    } 
-    if (i == intervalsArray.length - 2) { 
-        if (isNaN(frecuenciasEsperadas[intervalsArray.length - 1]) || frecuenciasEsperadas[intervalsArray.length - 1] < 5) { 
-            intervalsArray[i + 1].count += parseFloat(intervalsArray[i].count); 
-            intervalsArray[i + 1].intervalStart = intervalsArray[i].intervalStart; 
-            const nuevaFrecuenciaEsperada = parseFloat((frecuenciasEsperadas[i + 1] + frecuenciasEsperadas[i]).toFixed(2)); 
-            frecuenciasEsperadas[i + 1] = isNaN(nuevaFrecuenciaEsperada) ? 0 : nuevaFrecuenciaEsperada; 
-            intervalsArray.splice(i, 1); 
-            frecuenciasEsperadas.splice(i, 1); 
-            i = 0; 
-        } 
-    } 
-}
-
+    for (let i = 0; i < intervalsArray.length - 1; i++) { 
+      while (isNaN(frecuenciasEsperadas[i]) || frecuenciasEsperadas[i] < 5) { 
+          intervalsArray[i + 1].count += parseFloat(intervalsArray[i].count); 
+          intervalsArray[i + 1].intervalStart = intervalsArray[i].intervalStart; 
+          const nuevaFrecuenciaEsperada = parseFloat((frecuenciasEsperadas[i + 1] + frecuenciasEsperadas[i]).toFixed(2)); 
+          frecuenciasEsperadas[i + 1] = isNaN(nuevaFrecuenciaEsperada) ? 0 : nuevaFrecuenciaEsperada; 
+          intervalsArray.splice(i, 1); 
+          frecuenciasEsperadas.splice(i, 1); 
+          i = 0; 
+      } 
+      if (i == intervalsArray.length - 2) { 
+          if (isNaN(frecuenciasEsperadas[intervalsArray.length - 1]) || frecuenciasEsperadas[intervalsArray.length - 1] < 5) { 
+              intervalsArray[i + 1].count += parseFloat(intervalsArray[i].count); 
+              intervalsArray[i + 1].intervalStart = intervalsArray[i].intervalStart; 
+              const nuevaFrecuenciaEsperada = parseFloat((frecuenciasEsperadas[i + 1] + frecuenciasEsperadas[i]).toFixed(2)); 
+              frecuenciasEsperadas[i + 1] = isNaN(nuevaFrecuenciaEsperada) ? 0 : nuevaFrecuenciaEsperada; 
+              intervalsArray.splice(i, 1); 
+              frecuenciasEsperadas.splice(i, 1); 
+              i = 0; 
+          } 
+      } 
+  }
     
 
     drawChart(intervalsArrayKS);
     setIntervalArrayChi(intervalsArray);
 
-    // CALCULAR Fo, Fe y Chi
-    
-
     const estadistico = intervalsArray.map((interval, index) => {
-      return Math.pow(interval.count - frecuenciasEsperadas[0], 2) / frecuenciasEsperadas[0];
+      return Math.pow(interval.count - frecuenciasEsperadas[index], 2) / frecuenciasEsperadas[index];
     });
-
-    // const cAc = [];
-    // let acumulado = 0;
-    // for (let i = 0; i < c.length; i++) {
-    //     acumulado += c[i];
-    //     console.log(c[i])
-    //     cAc.push(acumulado);
-    // }
   
     setFrecuenciaObservada(frecuenciasObservadas);
     setFrecuenciaEsperada(frecuenciasEsperadas);
     setC(estadistico);
-    // setCAc(cAc)
-
-    // const chicalc = calcularChiCuadrado(intervalsArray.count, frecuenciasEsperadas)
-    // const chicalc = 0
-    // console.log(chicalc)
-    // setChiCalculado(chicalc);
-    // setChiCalculadoMenor(chicalc < parseFloat(jStat.chisquare.inv(0.95, intervalsArray.length-1).toFixed(4)))
-
-    // const kscacl = calcularKS(frecuenciasObservadas, frecuenciasEsperadasKS, randomNumbers.length)
-    // console.log(kscacl)
-    // setKsCalculado(kscacl)
-    // setKsCalculadoMenor(kscacl < parseFloat(1.36/Math.sqrt(randomNumbers.length).toFixed(4)))
   };
 
-
+  
   //   DIBUJAR HISTOGRAMA
   const drawChart = (intervals) => {
     const labels = intervals.map(
@@ -324,24 +284,24 @@ function Uniforme() {
 
   return (
     <div>
-      <h2>Uniforme</h2>
-      <label htmlFor="a">Ingrese el valor de A:</label>
-      <input
-        type="number"
-        id="a"
-        value={a}
-        onChange={handleAChange}
-        placeholder="A"
-      />
-      <br />
-      <label htmlFor="b">Ingrese el valor de B:</label>
-      <input
-        type="number"
-        id="b"
-        value={b}
-        onChange={handleBChange}
-        placeholder="B"
-      />
+    <h2>Normal</h2>
+   <label htmlFor="a">Ingrese el valor de la media:</label>
+   <input
+     type="number"
+     id="a"
+     value={media}
+     onChange={handleAChange}
+     placeholder="Media"
+   />
+   <br />
+   <label htmlFor="b">Ingrese el valor de la desviacion:</label>
+   <input
+     type="number"
+     id="b"
+     value={desviacion}
+     onChange={handleBChange}
+     placeholder="Desviacion"
+   />
 
       {/*
       {a && b && (
@@ -388,16 +348,16 @@ function Uniforme() {
 
       {numerosGenerados && dataStats && (
         <>
-            <div>
-            <h2>Estadísticas:</h2>
-            <p>Cantidad de datos: {dataStats.count}</p>
-            <p>Máximo: {parseFloat(dataStats.max).toFixed(4)}</p>
-            <p>Mínimo: {parseFloat(dataStats.min).toFixed(4)}</p>
-            <p>Rango: {parseFloat(dataStats.range).toFixed(4)}</p>
-            <p>Amplitud: {parseFloat(dataStats.amplitude).toFixed(4)}</p>
-            </div>
-            {/* <Tabla frecuencias={intervals}/> */}
-        </>
+          <div>
+          <h2>Estadísticas:</h2>
+          <p>Cantidad de datos: {dataStats.count}</p>
+          <p>Máximo: {parseFloat(dataStats.max).toFixed(4)}</p>
+          <p>Mínimo: {parseFloat(dataStats.min).toFixed(4)}</p>
+          <p>Rango: {parseFloat(dataStats.range).toFixed(4)}</p>
+          <p>Amplitud: {parseFloat(dataStats.amplitude).toFixed(4)}</p>
+          </div>
+          {/* <Tabla frecuencias={intervals}/> */}
+      </>
       )}
 
       <div>
@@ -407,7 +367,7 @@ function Uniforme() {
 
       {numerosGenerados && dataStats && frecuenciaEsperada && (
         <>
-          <h4>H0: La serie de datos presenta una distribucion uniforme</h4>
+          <h4>H0: La serie de datos presenta una distribucion Normal</h4>
 
           <br />
           <br />
@@ -420,11 +380,11 @@ function Uniforme() {
 
       
               Chi calculado: {parseFloat(chiCalculado).toFixed(4)}
-              {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1).toFixed(4)))
+              {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1-2).toFixed(4)))
                 ? "   <   "
                 : "   >   "}
-              Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1)).toFixed(4)}    ➙           
-              {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1).toFixed(4)))
+              Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1-2)).toFixed(4)}    ➙           
+              {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1-2).toFixed(4)))
                 ? "   No se rechaza la H0"
                 : "   Se rechaza la H0"}
             </div>
@@ -453,4 +413,4 @@ function Uniforme() {
   );
 }
 
-export default Uniforme;
+export default Normal;
