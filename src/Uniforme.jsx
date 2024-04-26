@@ -423,7 +423,7 @@ function Uniforme() {
               {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1).toFixed(4)))
                 ? "   <   "
                 : "   >   "}
-              Chi tabulado (α: 0,05): {parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1)).toFixed(4)}    ➙           
+              Chi tabulado (α: 0,05 - grados de libertad: {intervalArrayChi.length-1}): {parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1)).toFixed(4)}    ➙           
               {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1).toFixed(4)))
                 ? "   No se rechaza la H0"
                 : "   Se rechaza la H0"}

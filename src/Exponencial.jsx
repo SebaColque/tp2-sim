@@ -385,11 +385,11 @@ function Exponencial() {
         />
         <div>
           Chi calculado: {parseFloat(chiCuadrado).toFixed(4)}
-          {chiCuadrado < parseFloat(jStat.chisquare.inv(0.95, cantIntervalos - 2).toFixed(4))
+          {chiCuadrado < parseFloat(jStat.chisquare.inv(0.95, frecuencias.length - 2).toFixed(4))
             ? "   <   "
             : "   >   "}
-          Chi tabulado (α: 0,05): {parseFloat(jStat.chisquare.inv(0.95, cantIntervalos - 2)).toFixed(4)}    ➙
-          {chiCuadrado < parseFloat(jStat.chisquare.inv(0.95, cantIntervalos - 2).toFixed(4))
+          Chi tabulado (α: 0,05 - grados de libertad: {frecuencias.length - 2}): {parseFloat(jStat.chisquare.inv(0.95, frecuencias.length - 2)).toFixed(4)}    ➙
+          {chiCuadrado < parseFloat(jStat.chisquare.inv(0.95, frecuencias.length - 2).toFixed(4))
             ? "   No se rechaza la H0"
             : "   Se rechaza la H0"}
         </div>

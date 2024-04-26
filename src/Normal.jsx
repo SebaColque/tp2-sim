@@ -36,8 +36,8 @@ function Normal() {
    const [numerosGenerados, setNumerosGenerados] = useState(false)
    const generateRandomNumbers = () => {
     const randomArray = [];
-    const m = parseInt(media);
-    const d = parseInt(desviacion);
+    const m = parseFloat(media);
+    const d = parseFloat(desviacion);
     for (let i = 0; i < sampleSize; i += 2) {
         const u1 = Math.random();
         const u2 = Math.random();
@@ -383,7 +383,7 @@ function Normal() {
               {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1-2).toFixed(4)))
                 ? "   <   "
                 : "   >   "}
-              Chi tabulado (α: 0,05): {parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1-2)).toFixed(4)}    ➙           
+              Chi tabulado (α: 0,05 - grados de libertad: {intervalArrayChi.length-1-2}): {parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1-2)).toFixed(4)}    ➙           
               {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1-2).toFixed(4)))
                 ? "   No se rechaza la H0"
                 : "   Se rechaza la H0"}
