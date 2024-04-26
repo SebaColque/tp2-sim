@@ -9,18 +9,21 @@ function Exponencial() {
   const [media, setMedia] = useState('');
   const [lambda, setLambda] = useState('');
   const [numerosAleatorios, setNumerosAleatorios] = useState([]);
-  const [cantIntervalos, setCantIntervalos] = useState(5);
+  const [cantIntervalos, setCantIntervalos] = useState(10);
+  const [cantIntervalosUser, setCantIntervalosUser] = useState(10);
   const [dataSet, setDataSet] = useState(false);
   const [dataStats, setDataStats] = useState(false);
   const [frecuencias, setFrecuencias] = useState([]);
   const [cantMuestra, setCantMuestra] = useState(10000);
+  const [intervalArrayKS, setIntervalArrayKS] = useState();
   const [resultadoPrueba, setResultadoPrueba] = useState(null); // Aceptar o rechazar la hipótesis
   const [chiCuadrado, setChiCuadrado] = useState(null);
   const [chiTabulado, setChiTabulado] = useState(null);
-  const [ksCalcualdo, setKsCalculado] = useState();
+  const [ksCalculado, setKsCalculado] = useState();
   const [ksCalculadoMenor, setKsCalculadoMenor] = useState(false);
   const [c, setC] = useState();
-
+  const [frecuenciaEsperadaKS,setFrecuenciaEsperadaKS] = useState([]);
+  const [frecuenciaEsperadaKS2,setFrecuenciaEsperadaKS2] = useState([]);
   const [frecChi, setFrecChi] = useState(
     {
       fo: [],
@@ -59,6 +62,7 @@ function Exponencial() {
 
   const handleChangeIntervalos = (event) => {
     setCantIntervalos(parseInt(event.target.value, 10));
+    setCantIntervalosUser(parseInt(event.target.value, 10));
   };
 
   const handleChangeMuestra = (event) => {
@@ -67,7 +71,7 @@ function Exponencial() {
 
   const calcularFrecuenciasEsperadas = (k, min, max, numeros, lambda) => {
     const amplitud = (max - min) / k;
-    const frecuenciasEsperadas = [];
+    const frecEsperadaKS = [];
     for (let i = 0; i < k; i++) {
         let intervaloInicio = min + (i * amplitud);
         let intervaloFin = intervaloInicio + amplitud;
@@ -79,10 +83,9 @@ function Exponencial() {
         // Frecuencia esperada es la probabilidad del intervalo multiplicada por la cantidad total de números generados
         let frecuenciaEsperada = parseFloat((probInicio - probFin) * numeros.length);
 
-        frecuenciasEsperadas.push(parseFloat(frecuenciaEsperada.toFixed(2)));
+        frecEsperadaKS.push(parseFloat(frecuenciaEsperada.toFixed(2)));
       }
-
-    return frecuenciasEsperadas;
+    return frecEsperadaKS;
 };
 
 
@@ -100,6 +103,7 @@ function Exponencial() {
     const amplitud = rango / k;
 
     const frecuencias = [];
+    const frecuenciasKS = [];
 
     for (let i = 0; i < k; i++) {
       const intervaloInicio = min + i * amplitud - (0.000001);
@@ -114,26 +118,57 @@ function Exponencial() {
         intervaloInferior: parseFloat(intervaloInicio.toFixed(2)),
         frecuencia: parseFloat(frecuencia)
       });
+      frecuenciasKS.push({
+        intervalStart :  parseFloat(intervaloInicio.toFixed(2)),
+        intervalEnd : parseFloat(intervaloFin.toFixed(2)),
+        count: parseFloat(frecuencia)
+      });
+
     }
+    setIntervalArrayKS(frecuenciasKS);
 
 
     const frecuenciasEsperadas = calcularFrecuenciasEsperadas(k, min, max, numeros, lambda);
+    const frecuenciasEsperadasKS = calcularFrecuenciasEsperadas(k, min, max, numeros, lambda);
+    setFrecuenciaEsperadaKS(frecuenciasEsperadasKS);
 
-    for (let i = frecuencias.length - 1; i > 0; i--) {
-      while (isNaN(frecuenciasEsperadas[i]) || frecuenciasEsperadas[i] < 5) {
-        frecuencias[i - 1].frecuencia += parseFloat(frecuencias[i].frecuencia);
-        const nuevaFrecuenciaEsperada = parseFloat((frecuenciasEsperadas[i - 1] + frecuenciasEsperadas[i]).toFixed(2));
-        frecuenciasEsperadas[i - 1] = isNaN(nuevaFrecuenciaEsperada) ? 0 : nuevaFrecuenciaEsperada;
-        frecuencias.splice(i, 1);
-        frecuenciasEsperadas.splice(i, 1);
-        i = frecuencias.length - 1;
-      }
-    }
+    for (let i = 0; i < frecuencias.length - 1; i++) { 
+      while (isNaN(frecuenciasEsperadas[i]) || frecuenciasEsperadas[i] < 5) { 
+          frecuencias[i + 1].count += parseFloat(frecuencias[i].count); 
+          frecuencias[i + 1].intervalStart = frecuencias[i].intervalStart; 
+          const nuevaFrecuenciaEsperada = parseFloat((frecuenciasEsperadas[i + 1] + frecuenciasEsperadas[i]).toFixed(2)); 
+          frecuenciasEsperadas[i + 1] = isNaN(nuevaFrecuenciaEsperada) ? 0 : nuevaFrecuenciaEsperada; 
+          frecuencias.splice(i, 1); 
+          frecuenciasEsperadas.splice(i, 1); 
+          i = 0; 
+      } 
+      if (i == frecuencias.length - 2) { 
+          if (isNaN(frecuenciasEsperadas[frecuencias.length - 1]) || frecuenciasEsperadas[frecuencias.length - 1] < 5) { 
+              frecuencias[i + 1].count += parseFloat(frecuencias[i].count); 
+              frecuencias[i + 1].intervalStart = frecuencias[i].intervalStart; 
+              const nuevaFrecuenciaEsperada = parseFloat((frecuenciasEsperadas[i + 1] + frecuenciasEsperadas[i]).toFixed(2)); 
+              frecuenciasEsperadas[i + 1] = isNaN(nuevaFrecuenciaEsperada) ? 0 : nuevaFrecuenciaEsperada; 
+              frecuencias.splice(i, 1); 
+              frecuenciasEsperadas.splice(i, 1); 
+              i = 0; 
+          } 
+      } 
+  }
+
+    // for (let i = frecuencias.length - 1; i > 0; i--) {
+    //   while (isNaN(frecuenciasEsperadas[i]) || frecuenciasEsperadas[i] < 5) {
+    //     frecuencias[i - 1].frecuencia += parseFloat(frecuencias[i].frecuencia);
+    //     const nuevaFrecuenciaEsperada = parseFloat((frecuenciasEsperadas[i - 1] + frecuenciasEsperadas[i]).toFixed(2));
+    //     frecuenciasEsperadas[i - 1] = isNaN(nuevaFrecuenciaEsperada) ? 0 : nuevaFrecuenciaEsperada;
+    //     frecuencias.splice(i, 1);
+    //     frecuenciasEsperadas.splice(i, 1);
+    //     i = frecuencias.length - 1;
+    //   }
+    // }
     
     const frecuenciasObservadas = frecuencias.map((frecuencia) => frecuencia.frecuencia);
 
     const stats = {
-      count: frecuencias.frecuencia,
       max: max,
       min: min,
       range: rango,
@@ -148,7 +183,7 @@ function Exponencial() {
     });
     
     const chiCuadrado = calcularChiCuadrado(frecuenciasObservadas, frecuenciasEsperadas);
-    const kscacl = calcularKS(frecuenciasObservadas, frecuenciasEsperadas, numerosAleatorios.length)
+    const kscacl = calcularKS(frecuenciasObservadas, frecuenciasEsperadasKS, numerosAleatorios.length)
     setKsCalculado(kscacl)
     setKsCalculadoMenor(kscacl < parseFloat(1.36/Math.sqrt(numerosAleatorios.length).toFixed(4)))
 
@@ -256,7 +291,7 @@ function Exponencial() {
       )}
       
               <h3>Gráfico de Frecuencias:</h3>
-              <FrequencyChart numbers={numerosAleatorios} intervals={cantIntervalos} />
+              <FrequencyChart numbers={numerosAleatorios} intervals={cantIntervalosUser} />
               <div>
                   <p>H0: La serie de datos presenta una distribución exponencial</p>
                 </div>
@@ -264,22 +299,37 @@ function Exponencial() {
                 <br />
               <br />
               <h3>Tabla ChiCuadrado</h3>
-                  <TablaChi
-                  intervalArray={frecuencias.map(({ intervaloInferior, intervaloSuperior, frecuencia }) => ({
+          <TablaChi intervalArray={frecuencias.map(({ intervaloInferior, intervaloSuperior, frecuencia }) => ({
                     intervalStart: parseFloat(intervaloInferior.toFixed(4)),
                     intervalEnd: parseFloat(intervaloSuperior.toFixed(4)), 
                     count: parseFloat(frecuencia)
-                  }))}
-                  fe={frecChi.fe}
-                  c={c}
-              />
+                  }))} fe={frecChi.fe}
+                  c={c} setChiCalculado={setChiCuadrado}/>
+            
+            
+            <div>
+      
+              Chi calculado: {parseFloat(chiCuadrado).toFixed(4)}
+              {(chiCuadrado < parseFloat(jStat.chisquare.inv(0.95, cantIntervalos-2).toFixed(4)))
+                ? "   <   "
+                : "   >   "}
+              Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, cantIntervalos-2)).toFixed(4)}    ➙           
+              {(chiCuadrado < parseFloat(jStat.chisquare.inv(0.95, cantIntervalos-2).toFixed(4)))
+                ? "   No se rechaza la H0"
+                : "   Se rechaza la H0"}
+            </div>
+          
 
-            <div className='chi'>
+          <br />
+          <br />
+
+            {/* {chiTabulado && (
+              <div className='chi'>
                 <div>
                   <h3>Chi Cuadrado:</h3>
                   <p>{chiCuadrado !== null ? chiCuadrado.toFixed(4) : 'Calculando...'}</p>
                 </div>
-                <div>{chiCuadrado < chiTabulado ? '<' : '>'}</div>
+                <div>{chiCuadrado !== null && (chiCuadrado < chiTabulado ? '<' : '>')}</div>
                 <div>
                   <h3>Chi Tabulado:</h3>
                   <p>{chiTabulado !== null ? chiTabulado.toFixed(4) : 'Calculando...'}</p>
@@ -287,26 +337,28 @@ function Exponencial() {
                 <h3>Resultado de la prueba:</h3>
                 <p>{resultadoPrueba !== null ? resultadoPrueba : 'Calculando...'}</p>
               </div>
+            )}
+            <br />
+            <br />
+          </> */}
+
 
           <br />
           <br />
           <h3>Tabla KS</h3>
-          <TablaKS
+            <TablaKS
             cantidadDatos={numerosAleatorios.length}
-            intervalArray={frecuencias.map(({ intervaloInferior, intervaloSuperior, frecuencia }) => ({
-              intervalStart: parseFloat(intervaloInferior.toFixed(4)),
-              intervalEnd: parseFloat(intervaloSuperior.toFixed(4)), 
-              count: parseFloat(frecuencia)
-            }))}
-            fe={frecChi.fe}
+            intervalArray={intervalArrayKS}
+            fe={frecuenciaEsperadaKS}
             c={c}
-          />
+            setKsCalculado={setKsCalculado}
+          /> 
               <div className='chi'>
                 <div>
                   <h3>KS calculado:</h3>
-                  <p>{ksCalcualdo !== null ? parseFloat(ksCalcualdo).toFixed(4) : 'Calculando...'}</p>
+                  <p>{ksCalculado !== null ? parseFloat(ksCalculado).toFixed(4) : 'Calculando...'}</p>
                 </div>
-                <div>{ksCalcualdo < parseFloat(1.36/Math.sqrt(numerosAleatorios.length)).toFixed(4) ? '<' : '>'}</div>
+                <div>{ksCalculado < parseFloat(1.36/Math.sqrt(numerosAleatorios.length)).toFixed(4) ? '<' : '>'}</div>
                 <div>
                   <h3>KS Tabulado:</h3>
                   <p>{parseFloat(1.36/Math.sqrt(numerosAleatorios.length)).toFixed(4) !== null ? parseFloat(1.36/Math.sqrt(numerosAleatorios.length)).toFixed(4) : 'Calculando...'}</p>
@@ -315,7 +367,7 @@ function Exponencial() {
                 <p>{(ksCalculadoMenor)
                       ? "   No se rechaza la H0"
                       : "   Se rechaza la H0"}</p>
-              </div>
+              </div> 
             </div>
           )}
         </div>
