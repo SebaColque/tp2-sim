@@ -36,8 +36,8 @@ function Uniforme() {
   const [numerosGenerados, setNumerosGenerados] = useState(false)
   const generateRandomNumbers = () => {
     const randomArray = [];
-    const numeroA = parseInt(a);
-    const numeroB = parseInt(b);
+    const numeroA = parseFloat(a);
+    const numeroB = parseFloat(b);
     for (let i = 0; i < sampleSize; i++) {
       randomArray.push(
         parseFloat(numeroA + Math.random() * (numeroB - numeroA - 0.0001)).toFixed(4)
@@ -59,7 +59,6 @@ function Uniforme() {
 
   // FUNCION CALCULAR CHI CUADRADO
   const calcularChiCuadrado = (observadas, esperadas) => {
-    console.log(observadas, esperadas)
     let chiCuadrado = 0;
     for (let i = 0; i < observadas.length; i++) {
       chiCuadrado += Math.pow(observadas[i] - esperadas[i], 2) / esperadas[i];
