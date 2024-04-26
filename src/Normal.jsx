@@ -44,7 +44,9 @@ function Normal() {
         const z1 = ((Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)) * d) + m;
         const z2 = ((Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2)) * d) + m;
         randomArray.push(parseFloat(z1).toFixed(4));
-        randomArray.push(parseFloat(z2).toFixed(4));
+        if (i < sampleSize - 1) {
+          randomArray.push(parseFloat(z2).toFixed(4));
+        }
     }
     setRandomNumbers(randomArray);
     setNumerosGenerados(true);
@@ -61,26 +63,26 @@ function Normal() {
 
 
   // FUNCION CALCULAR CHI CUADRADO
-  const calcularChiCuadrado = (observadas, esperadas) => {
-    let chiCuadrado = 0;
-    for (let i = 0; i < observadas.length; i++) {
-      chiCuadrado += Math.pow(observadas[i] - esperadas[i], 2) / esperadas[i];
-    }
-    return chiCuadrado;
-  };
+//   const calcularChiCuadrado = (observadas, esperadas) => {
+//     let chiCuadrado = 0;
+//     for (let i = 0; i < observadas.length; i++) {
+//       chiCuadrado += Math.pow(observadas[i] - esperadas[i], 2) / esperadas[i];
+//     }
+//     return chiCuadrado;
+//   };
 
-//   FUNCION CALCULAR KS
-  const calcularKS = (observadas, esperadas, cantidadDatos) => {
-    const diferenciasPoPeAc = [];
-    let probObservadaAcumulada = 0;
-    let probEsperadaAcumulada = 0;
-    for (let i = 0; i < observadas.length; i++) {
-        probObservadaAcumulada += observadas[i]/cantidadDatos;
-        probEsperadaAcumulada += esperadas[i]/cantidadDatos;
-        diferenciasPoPeAc.push(Math.abs(probObservadaAcumulada-probEsperadaAcumulada));
-      }
-      return Math.max(...diferenciasPoPeAc);
-  }
+// //   FUNCION CALCULAR KS
+//   const calcularKS = (observadas, esperadas, cantidadDatos) => {
+//     const diferenciasPoPeAc = [];
+//     let probObservadaAcumulada = 0;
+//     let probEsperadaAcumulada = 0;
+//     for (let i = 0; i < observadas.length; i++) {
+//         probObservadaAcumulada += observadas[i]/cantidadDatos;
+//         probEsperadaAcumulada += esperadas[i]/cantidadDatos;
+//         diferenciasPoPeAc.push(Math.abs(probObservadaAcumulada-probEsperadaAcumulada));
+//       }
+//       return Math.max(...diferenciasPoPeAc);
+//   }
 
 
   //  CALCULAR DATOS, INTERVALOS, GRAFICO, CHI

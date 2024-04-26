@@ -58,26 +58,26 @@ function Uniforme() {
 
 
   // FUNCION CALCULAR CHI CUADRADO
-  const calcularChiCuadrado = (observadas, esperadas) => {
-    let chiCuadrado = 0;
-    for (let i = 0; i < observadas.length; i++) {
-      chiCuadrado += Math.pow(observadas[i] - esperadas[i], 2) / esperadas[i];
-    }
-    return chiCuadrado;
-  };
+//   const calcularChiCuadrado = (observadas, esperadas) => {
+//     let chiCuadrado = 0;
+//     for (let i = 0; i < observadas.length; i++) {
+//       chiCuadrado += Math.pow(observadas[i] - esperadas[i], 2) / esperadas[i];
+//     }
+//     return chiCuadrado;
+//   };
 
-//   FUNCION CALCULAR KS
-  const calcularKS = (observadas, esperadas, cantidadDatos) => {
-    const diferenciasPoPeAc = [];
-    let probObservadaAcumulada = 0;
-    let probEsperadaAcumulada = 0;
-    for (let i = 0; i < observadas.length; i++) {
-        probObservadaAcumulada += observadas[i]/cantidadDatos;
-        probEsperadaAcumulada += esperadas[i]/cantidadDatos;
-        diferenciasPoPeAc.push(Math.abs(probObservadaAcumulada-probEsperadaAcumulada));
-      }
-      return Math.max(...diferenciasPoPeAc);
-  }
+  // FUNCION CALCULAR KS
+//   const calcularKS = (observadas, esperadas, cantidadDatos) => {
+//     const diferenciasPoPeAc = [];
+//     let probObservadaAcumulada = 0;
+//     let probEsperadaAcumulada = 0;
+//     for (let i = 0; i < observadas.length; i++) {
+//         probObservadaAcumulada += observadas[i]/cantidadDatos;
+//         probEsperadaAcumulada += esperadas[i]/cantidadDatos;
+//         diferenciasPoPeAc.push(Math.abs(probObservadaAcumulada-probEsperadaAcumulada));
+//       }
+//       return Math.max(...diferenciasPoPeAc);
+//   }
 
 
   //  CALCULAR DATOS, INTERVALOS, GRAFICO, CHI
