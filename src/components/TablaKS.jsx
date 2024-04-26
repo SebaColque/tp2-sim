@@ -4,6 +4,7 @@ function TablaKS({cantidadDatos, intervalArray, fe, setKsCalculado}) {
 
     let maximoPrimeraLista = 0;
 
+    console.log(intervalArray)
     const [observadoAcumulado, setObservadoAcumulado] = useState([]);
     const [esperadoAcumulado, setEsperadoAcumulado] = useState([]);
     const [diferenciaPoPe, setDiferenciaPoPe] = useState([]);

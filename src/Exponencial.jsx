@@ -4,6 +4,7 @@ import jStat from 'jstat';
 import NumberList from './components/NumberList';
 import TablaChi from './components/Tabla';
 import TablaKS from './components/TablaKS';
+import Chart from "chart.js/auto";
 
 function Exponencial() {
   const [media, setMedia] = useState('');
@@ -30,6 +31,15 @@ function Exponencial() {
       fe: []
     }
   );
+
+  const [muestra, setMuestra] = useState(30);
+  const handleSampleSizeChange = (e) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value > 0 && value <= 1000000) {
+      
+      setMuestra(value);
+    }
+  };
 
   useEffect(() => {
     if (numerosAleatorios.length > 0) {
@@ -125,7 +135,8 @@ function Exponencial() {
       });
 
     }
-    setIntervalArrayKS(frecuenciasKS);
+    // console.log(frecuenciasKS)
+    // setIntervalArrayKS(frecuenciasKS);
 
 
     const frecuenciasEsperadas = calcularFrecuenciasEsperadas(k, min, max, numeros, lambda);
@@ -169,6 +180,7 @@ function Exponencial() {
     const frecuenciasObservadas = frecuencias.map((frecuencia) => frecuencia.frecuencia);
 
     const stats = {
+      count: numeros.length,
       max: max,
       min: min,
       range: rango,
@@ -176,11 +188,13 @@ function Exponencial() {
     };
     setDataStats(stats);
     
-
+    setIntervalArrayKS(frecuenciasKS);
     setFrecChi({
       fo: frecuenciasObservadas,
       fe: frecuenciasEsperadas
     });
+
+    drawChart(frecuenciasKS);
     
     const chiCuadrado = calcularChiCuadrado(frecuenciasObservadas, frecuenciasEsperadas);
     const kscacl = calcularKS(frecuenciasObservadas, frecuenciasEsperadasKS, numerosAleatorios.length)
@@ -196,6 +210,7 @@ function Exponencial() {
 
     setFrecuencias(frecuencias);
     setChiCuadrado(chiCuadrado);
+    calculateStats();
   };
 
   const calcularChiCuadrado = (observadas, esperadas) => {
@@ -228,151 +243,185 @@ function Exponencial() {
       }
       return Math.max(...diferenciasPoPeAc);
   }
+
+  const [myChart, setMyChart] = useState();
+  //   DIBUJAR HISTOGRAMA
+  const drawChart = (intervals) => {
+    const labels = intervals.map(
+      (interval) => `[${interval.intervalStart} - ${interval.intervalEnd}]`
+    );
+    const counts = intervals.map((interval) => interval.count);
+
+    const canvas = document.getElementById("myChart");
+    const ctx = canvas.getContext("2d");
+
+    if (myChart) {
+      myChart.destroy();
+      setMyChart();
+    }
+
+    setMyChart(
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Frecuencia Observada",
+              data: counts,
+              backgroundColor: "rgba(54, 162, 235, 0.2)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "Frecuencias Observadas"
+              }
+            },
+            x: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "Intervalos"
+              }
+            },
+          },
+        },
+      })
+    );
+  };
   return (
     <div className='exponencial'>
-      <h2>Exponencial</h2>
-      <div className='form'>
-        <div className='form-group'>
-          <label htmlFor="media">Ingrese el valor de la media:</label>
-          <input
-            type="number"
-            id="media"
-            value={media}
-            onChange={handleChangeMedia}
-            placeholder="Media"
-          />
-        </div>
-        <div className='form-group'>
-          <label htmlFor="muestra">Ingrese cantidad de muestra:</label>
-          <input
-            type="number"
-            id="muestra"
-            value={cantMuestra}
-            onChange={handleChangeMuestra}
-            placeholder="Muestra"
-          />
-        </div>
-        <div className='form-group'>
-          <label ></label>
-            Seleccionar intervalos:
-            <select value={cantIntervalos} onChange={handleChangeIntervalos} className="selectIntervalos">
-              <option value="10">10</option>
-              <option value="12">12</option>
-              <option value="16">16</option>
-              <option value="23">23</option>
-            </select>
-        </div>
+  <h2>Exponencial</h2>
+  <div className='form'>
+    <div className='form-group'>
+      <label htmlFor="media">Ingrese el valor de la media:</label>
+      <input
+        type="number"
+        id="media"
+        value={media}
+        onChange={handleChangeMedia}
+        placeholder="Media"
+      />
+    </div>
+    <div className='form-group'>
+      <label>
+        Tamaño de la muestra (hasta 1,000,000):
+        <input
+          type="number"
+          value={muestra}
+          onChange={handleSampleSizeChange}
+        />
+      </label>
+    </div>
+    <div className='form-group'>
+      <label>Seleccionar intervalos:</label>
+      <select value={cantIntervalos} onChange={handleChangeIntervalos} className="selectIntervalos">
+        <option value="10">10</option>
+        <option value="12">12</option>
+        <option value="16">16</option>
+        <option value="23">23</option>
+      </select>
+    </div>
+  </div>
 
-      </div>
-       
-      <button onClick={() => generarNumerosAleatorios(cantMuestra)}>Generar números aleatorios</button>
-        
-      {/* {media && <p>Media ingresada: {media}</p>} */}
-      {numerosAleatorios.length > 0 && (
+  <button onClick={() => generarNumerosAleatorios(muestra)}>Generar números aleatorios</button>
+
+  {/* {media && <p>Media ingresada: {media}</p>} */}
+  {numerosAleatorios.length > 0 && (
+    <div>
+      <h3>Números aleatorios generados:</h3>
+      <NumberList randomNumbers={numerosAleatorios}/>
+      <br />
+      {/* <button onClick={calculateStats}>Crear histograma</button> */}
+      {dataSet && (
         <div>
-          <h3>Números aleatorios generados:</h3>
-          <NumberList randomNumbers={numerosAleatorios}/>
-          <br />
-          <button onClick={calculateStats}>Crear histograma</button>
-          {dataSet && (
-            <div>
-                  {dataSet && dataStats && (
-        <>
-            <div>
-            <h2>Estadísticas:</h2>
-            <p>Cantidad de datos: {dataStats.count}</p>
-            <p>Máximo: {parseFloat(dataStats.max).toFixed(4)}</p>
-            <p>Mínimo: {parseFloat(dataStats.min).toFixed(4)}</p>
-            <p>Rango: {parseFloat(dataStats.range).toFixed(4)}</p>
-            <p>Amplitud: {parseFloat(dataStats.amplitude).toFixed(4)}</p>
-            </div>
-            {/* <Tabla frecuencias={intervals}/> */}
-        </>
-      )}
-      
-              <h3>Gráfico de Frecuencias:</h3>
-              <FrequencyChart numbers={numerosAleatorios} intervals={cantIntervalosUser} />
+          {dataSet && dataStats && (
+            <>
               <div>
-                  <p>H0: La serie de datos presenta una distribución exponencial</p>
-                </div>
-
-                <br />
-              <br />
-              <h3>Tabla ChiCuadrado</h3>
-          <TablaChi intervalArray={frecuencias.map(({ intervaloInferior, intervaloSuperior, frecuencia }) => ({
-                    intervalStart: parseFloat(intervaloInferior.toFixed(4)),
-                    intervalEnd: parseFloat(intervaloSuperior.toFixed(4)), 
-                    count: parseFloat(frecuencia)
-                  }))} fe={frecChi.fe}
-                  c={c} setChiCalculado={setChiCuadrado}/>
-            
-            
-            <div>
-      
-              Chi calculado: {parseFloat(chiCuadrado).toFixed(4)}
-              {(chiCuadrado < parseFloat(jStat.chisquare.inv(0.95, cantIntervalos-2).toFixed(4)))
-                ? "   <   "
-                : "   >   "}
-              Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, cantIntervalos-2)).toFixed(4)}    ➙           
-              {(chiCuadrado < parseFloat(jStat.chisquare.inv(0.95, cantIntervalos-2).toFixed(4)))
-                ? "   No se rechaza la H0"
-                : "   Se rechaza la H0"}
-            </div>
-          
-
-          <br />
-          <br />
-
-            {/* {chiTabulado && (
-              <div className='chi'>
-                <div>
-                  <h3>Chi Cuadrado:</h3>
-                  <p>{chiCuadrado !== null ? chiCuadrado.toFixed(4) : 'Calculando...'}</p>
-                </div>
-                <div>{chiCuadrado !== null && (chiCuadrado < chiTabulado ? '<' : '>')}</div>
-                <div>
-                  <h3>Chi Tabulado:</h3>
-                  <p>{chiTabulado !== null ? chiTabulado.toFixed(4) : 'Calculando...'}</p>
-                </div>
-                <h3>Resultado de la prueba:</h3>
-                <p>{resultadoPrueba !== null ? resultadoPrueba : 'Calculando...'}</p>
+                <h2>Estadísticas:</h2>
+                <p>Cantidad de datos: {dataStats.count}</p>
+                <p>Máximo: {parseFloat(dataStats.max).toFixed(4)}</p>
+                <p>Mínimo: {parseFloat(dataStats.min).toFixed(4)}</p>
+                <p>Rango: {parseFloat(dataStats.range).toFixed(4)}</p>
+                <p>Amplitud: {parseFloat(dataStats.amplitude).toFixed(4)}</p>
               </div>
-            )}
-            <br />
-            <br />
-          </> */}
-
-
-          <br />
-          <br />
-          <h3>Tabla KS</h3>
-            <TablaKS
-            cantidadDatos={numerosAleatorios.length}
-            intervalArray={intervalArrayKS}
-            fe={frecuenciaEsperadaKS}
-            c={c}
-            setKsCalculado={setKsCalculado}
-          /> 
-              <div className='chi'>
-                <div>
-                  <h3>KS calculado:</h3>
-                  <p>{ksCalculado !== null ? parseFloat(ksCalculado).toFixed(4) : 'Calculando...'}</p>
-                </div>
-                <div>{ksCalculado < parseFloat(1.36/Math.sqrt(numerosAleatorios.length)).toFixed(4) ? '<' : '>'}</div>
-                <div>
-                  <h3>KS Tabulado:</h3>
-                  <p>{parseFloat(1.36/Math.sqrt(numerosAleatorios.length)).toFixed(4) !== null ? parseFloat(1.36/Math.sqrt(numerosAleatorios.length)).toFixed(4) : 'Calculando...'}</p>
-                </div>
-                <h3>Resultado de la prueba:</h3>
-                <p>{(ksCalculadoMenor)
-                      ? "   No se rechaza la H0"
-                      : "   Se rechaza la H0"}</p>
-              </div> 
-            </div>
+              {/* <Tabla frecuencias={intervals}/> */}
+            </>
           )}
         </div>
       )}
     </div>
+  )}
+
+
+      <div>
+        <canvas id="myChart"></canvas>
+      </div>
+  {numerosAleatorios.length > 0 && dataSet && dataStats && (
+    <div>
+      <div>
+        <div>
+          <p>H0: La serie de datos presenta una distribución exponencial</p>
+        </div>
+        <br />
+        <br />
+        <h3>Tabla ChiCuadrado</h3>
+        <TablaChi
+          intervalArray={frecuencias.map(({ intervaloInferior, intervaloSuperior, frecuencia }) => ({
+            intervalStart: parseFloat(intervaloInferior.toFixed(4)),
+            intervalEnd: parseFloat(intervaloSuperior.toFixed(4)),
+            count: parseFloat(frecuencia)
+          }))}
+          fe={frecChi.fe}
+          c={c}
+          setChiCalculado={setChiCuadrado}
+        />
+        <div>
+          Chi calculado: {parseFloat(chiCuadrado).toFixed(4)}
+          {chiCuadrado < parseFloat(jStat.chisquare.inv(0.95, cantIntervalos - 2).toFixed(4))
+            ? "   <   "
+            : "   >   "}
+          Chi tabulado (α: 0,05): {parseFloat(jStat.chisquare.inv(0.95, cantIntervalos - 2)).toFixed(4)}    ➙
+          {chiCuadrado < parseFloat(jStat.chisquare.inv(0.95, cantIntervalos - 2).toFixed(4))
+            ? "   No se rechaza la H0"
+            : "   Se rechaza la H0"}
+        </div>
+        <br />
+        <br />
+        <br />
+        <br />
+        <h3>Tabla KS</h3>
+        <TablaKS
+          cantidadDatos={numerosAleatorios.length}
+          intervalArray={intervalArrayKS}
+          fe={frecuenciaEsperadaKS}
+          c={c}
+          setKsCalculado={setKsCalculado}
+        />
+        <div className='chi'>
+          <div>
+            <h3>KS calculado:</h3>
+            <p>{ksCalculado !== null ? parseFloat(ksCalculado).toFixed(4) : 'Calculando...'}</p>
+          </div>
+          <div>{ksCalculado < parseFloat(1.36 / Math.sqrt(numerosAleatorios.length)).toFixed(4) ? '<' : '>'}</div>
+          <div>
+            <h3>KS Tabulado (α: 0,05):</h3>
+            <p>{parseFloat(1.36 / Math.sqrt(numerosAleatorios.length)).toFixed(4) !== null ? parseFloat(1.36 / Math.sqrt(numerosAleatorios.length)).toFixed(4) : 'Calculando...'}</p>
+          </div>
+          <h3>Resultado de la prueba:</h3>
+          <p>{ksCalculadoMenor ? "   No se rechaza la H0" : "   Se rechaza la H0"}</p>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
   );
 }
   export default Exponencial;

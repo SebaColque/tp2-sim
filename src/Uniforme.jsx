@@ -423,7 +423,7 @@ function Uniforme() {
               {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1).toFixed(4)))
                 ? "   <   "
                 : "   >   "}
-              Chi tabulado: {parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1)).toFixed(4)}    ➙           
+              Chi tabulado (α: 0,05): {parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1)).toFixed(4)}    ➙           
               {(chiCalculado < parseFloat(jStat.chisquare.inv(0.95, intervalArrayChi.length-1).toFixed(4)))
                 ? "   No se rechaza la H0"
                 : "   Se rechaza la H0"}
@@ -442,7 +442,7 @@ function Uniforme() {
             {(ksCalcualdo < parseFloat(1.36/Math.sqrt(randomNumbers.length).toFixed(4)))
               ? "   <   "
               : "   >   "}
-            KS tabulado: {parseFloat(1.36/Math.sqrt(randomNumbers.length)).toFixed(4)}    ➙           
+            KS tabulado (α: 0,05): {parseFloat(1.36/Math.sqrt(randomNumbers.length)).toFixed(4)}    ➙           
             {(ksCalcualdo < parseFloat(1.36/Math.sqrt(randomNumbers.length).toFixed(4)))
               ? "   No se rechaza la H0"
               : "   Se rechaza la H0"}
